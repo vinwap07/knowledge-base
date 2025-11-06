@@ -4,8 +4,7 @@ namespace knowledgeBase.Controllers;
 
 public abstract class BaseController
 {
-    protected HttpListenerContext _context;
-    public abstract string HandleRequest(Dictionary<string, object> parameters);
+    public abstract Task<string> HandleRequest();
     protected string Json(object data);
     protected string View(string templateName, object model);
     protected void Redirect(string url);
