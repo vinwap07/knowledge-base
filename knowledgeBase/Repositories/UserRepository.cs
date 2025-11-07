@@ -1,5 +1,6 @@
 using System.Data;
 using knowledgeBase.Entities;
+using knowledgeBase.DataBase;
 
 namespace knowledgeBase.Repositories;
 
@@ -12,7 +13,7 @@ public class UserRepository: BaseRepository<User, string>
         _databaseConnection = databaseConnection;
     }
     
-    public override User? GetById(string email)
+    public async override Task<User?> GetById(string email)
     {
         var sql = @"select * from User where Email = @Email";
         var parameters = new Dictionary<string, object>
@@ -20,7 +21,7 @@ public class UserRepository: BaseRepository<User, string>
             ["@Email"] = email
         };
         
-        using var reader = _databaseConnection.ExecuteReader(sql, parameters);
+        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
         if (reader.Read())
         {
             return MapFromReader(reader);
@@ -29,12 +30,12 @@ public class UserRepository: BaseRepository<User, string>
         return null;
     }
 
-    public override List<User> GetAll()
+    public async override Task<List<User>> GetAll()
     {
         var sql = @"select * from User";
         var users = new List<User>();
         
-        using var reader = _databaseConnection.ExecuteReader(sql);
+        using var reader = await _databaseConnection.ExecuteReader(sql);
         if (reader.Read())
         {
             users.Add(MapFromReader(reader));
@@ -43,15 +44,8 @@ public class UserRepository: BaseRepository<User, string>
         return users;
     }
 
-    public override bool Create(User user)
+    public async override Task<bool> Create(User user)
     {
-        var isAlreadyExists = GetById(user.Email) != null;
-
-        if (isAlreadyExists)
-        {
-            return false;
-        }
-        
         var createSql = @"insert into User (Name, Email, Password, RoleId) 
                 values (@Email, @Name, @Password, @RoleId)";
         var createParameters = new Dictionary<string, object>
@@ -62,18 +56,10 @@ public class UserRepository: BaseRepository<User, string>
             ["@RoleId"] = user.RoleId
         };
 
-        try
-        {
-            _databaseConnection.ExecuteNonQuery(createSql, createParameters);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return await _databaseConnection.ExecuteNonQuery(createSql, createParameters) > 0;
     }
 
-    public override bool Update(User user)
+    public async override Task<bool> Update(User user)
     {
         var sql = @"update user
                 set Name = @Name, Email = @Email, Password = @Password, RoleId = @RoleId 
@@ -86,19 +72,10 @@ public class UserRepository: BaseRepository<User, string>
             ["@RoleId"] = user.RoleId
         };
 
-        try
-        {
-            _databaseConnection.ExecuteNonQuery(sql, parameters);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-
+        return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
     }
 
-    public override bool Delete(string id)
+    public async override Task<bool> Delete(string id)
     {
         var sql = @"delete from User where Id = @Id";
         var parameters = new Dictionary<string, object>
@@ -106,15 +83,7 @@ public class UserRepository: BaseRepository<User, string>
             ["@Id"] = id
         };
 
-        try
-        {
-            _databaseConnection.ExecuteNonQuery(sql, parameters);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
     }
 
     protected override User MapFromReader(IDataReader reader)

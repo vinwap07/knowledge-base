@@ -1,5 +1,6 @@
 using System.Data;
 using knowledgeBase.Entities;
+using knowledgeBase.DataBase;
 
 namespace knowledgeBase.Repositories;
 
@@ -12,7 +13,7 @@ public class QuestionLogRepository : BaseRepository<QuestionLog, int>
         _databaseConnection = databaseConnection;
     }
 
-    public override QuestionLog? GetById(int id)
+    public async override Task<QuestionLog?> GetById(int id)
     {
         var sql = @"SELECT Id, Question, Answer, Assessment, UserComment FROM Sessions WHERE Id = @Id";
         var parameters = new Dictionary<string, object>
@@ -20,7 +21,7 @@ public class QuestionLogRepository : BaseRepository<QuestionLog, int>
             ["@Id"] = id
         };
 
-        using var reader = _databaseConnection.ExecuteReader(sql, parameters);
+        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
         if (reader.Read())
         {
             return MapFromReader(reader);
@@ -29,12 +30,12 @@ public class QuestionLogRepository : BaseRepository<QuestionLog, int>
         return null;
     }
 
-    public override List<QuestionLog> GetAll()
+    public async override Task<List<QuestionLog>> GetAll()
     {
         var sql = @"select * from QuestionLog";
         var questionLogs = new List<QuestionLog>();
         
-        using var reader = _databaseConnection.ExecuteReader(sql);
+        using var reader = await _databaseConnection.ExecuteReader(sql);
         if (reader.Read())
         {
             questionLogs.Add(MapFromReader(reader));
@@ -43,15 +44,8 @@ public class QuestionLogRepository : BaseRepository<QuestionLog, int>
         return questionLogs;
     }
 
-    public override bool Create(QuestionLog qLog)
+    public async override Task<bool> Create(QuestionLog qLog)
     {
-        var isAlreadyExists = GetById(qLog.Id) != null;
-
-        if (isAlreadyExists)
-        {
-            return false;
-        }
-        
         var createSql = @"insert into QuestionLog (Id, Question, Answer, Assessment, UserComment) 
                 values (@Id, @Question, @Answer, @Assessment, @UserComment);";
         var createParameters = new Dictionary<string, object>
@@ -63,18 +57,10 @@ public class QuestionLogRepository : BaseRepository<QuestionLog, int>
             ["@UserComment"] = qLog.UserComment
         };
 
-        try
-        {
-            _databaseConnection.ExecuteNonQuery(createSql, createParameters);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return await _databaseConnection.ExecuteNonQuery(createSql, createParameters) > 0;
     }
 
-    public override bool Update(QuestionLog qLog)
+    public async override Task<bool> Update(QuestionLog qLog)
     {
         var sql = @"update QuestionLog
                 set Question = @Question, Answer = @Answer, Assessment = @Assessment, UserComment = @UserComment 
@@ -88,18 +74,10 @@ public class QuestionLogRepository : BaseRepository<QuestionLog, int>
             ["@UserComment"] = qLog.UserComment
         };
 
-        try
-        {
-            _databaseConnection.ExecuteNonQuery(sql, parameters);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
     }
 
-    public override bool Delete(int id)
+    public async override Task<bool> Delete(int id)
     {
         var sql = @"delete from QuestionLog where Id = @Id";
         var parameters = new Dictionary<string, object>
@@ -107,15 +85,7 @@ public class QuestionLogRepository : BaseRepository<QuestionLog, int>
             ["@Id"] = id,
         };
 
-        try
-        {
-            _databaseConnection.ExecuteNonQuery(sql, parameters);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
     }
 
     protected override QuestionLog MapFromReader(IDataReader reader)

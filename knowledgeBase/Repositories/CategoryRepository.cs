@@ -1,5 +1,6 @@
 using System.Data;
 using knowledgeBase.Entities;
+using knowledgeBase.DataBase;
 
 namespace knowledgeBase.Repositories;
 
@@ -12,7 +13,7 @@ public class CategoryRepository : BaseRepository<Category, int>
         _databaseConnection = databaseConnection;
     }
     
-    public override Category? GetById(int id)
+    public async override Task<Category?> GetById(int id)
     {
         var sql = @"select * from Category where Id = @Id";
         var parameters = new Dictionary<string, object>
@@ -20,7 +21,7 @@ public class CategoryRepository : BaseRepository<Category, int>
             ["@Id"] = id
         };
         
-        using var reader = _databaseConnection.ExecuteReader(sql, parameters);
+        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
         if (reader.Read())
         {
             return MapFromReader(reader);
@@ -29,12 +30,12 @@ public class CategoryRepository : BaseRepository<Category, int>
         return null;
     }
 
-    public override List<Category> GetAll()
+    public async override Task<List<Category>> GetAll()
     {
         var sql = @"select * from Category";
         var questionLogs = new List<Category>();
         
-        using var reader = _databaseConnection.ExecuteReader(sql);
+        using var reader = await _databaseConnection.ExecuteReader(sql);
         if (reader.Read())
         {
             questionLogs.Add(MapFromReader(reader));
@@ -43,15 +44,8 @@ public class CategoryRepository : BaseRepository<Category, int>
         return questionLogs;
     }
 
-    public override bool Create(Category category)
+    public async override Task<bool> Create(Category category)
     {
-        var isAlreadyExists = GetById(category.Id) != null;
-
-        if (isAlreadyExists)
-        {
-            return false;
-        }
-        
         var createSql = @"insert into Category (Id, Name, Slug) 
                 values (@Id, @Name, @Slug);";
         var createParameters = new Dictionary<string, object>
@@ -61,18 +55,10 @@ public class CategoryRepository : BaseRepository<Category, int>
             ["@Slug"] = category.Slug
         };
 
-        try
-        {
-            _databaseConnection.ExecuteNonQuery(createSql, createParameters);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return await _databaseConnection.ExecuteNonQuery(createSql, createParameters) > 0;
     }
 
-    public override bool Update(Category category)
+    public async override Task<bool> Update(Category category)
     {
         var sql = @"update Category
                 set Name = @Name, Slug = @Slug
@@ -84,18 +70,10 @@ public class CategoryRepository : BaseRepository<Category, int>
             ["@Slug"] = category.Slug
         };
 
-        try
-        {
-            _databaseConnection.ExecuteNonQuery(sql, parameters);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
     }
 
-    public override bool Delete(int id)
+    public async override Task<bool> Delete(int id)
     {
         var sql = @"delete from Category where Id = @Id";
         var parameters = new Dictionary<string, object>
@@ -103,15 +81,7 @@ public class CategoryRepository : BaseRepository<Category, int>
             ["@Id"] = id,
         };
 
-        try
-        {
-            _databaseConnection.ExecuteNonQuery(sql, parameters);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
     }
 
     protected override Category MapFromReader(IDataReader reader)

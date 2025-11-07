@@ -1,5 +1,6 @@
 using System.Data;
 using knowledgeBase.Entities;
+using knowledgeBase.DataBase;
 
 namespace knowledgeBase.Repositories;
 
@@ -12,7 +13,7 @@ public class ArticleCategoryRepository : BaseRepository<ArticleCategory, int>
         _databaseConnection = databaseConnection;
     }
     
-    public override ArticleCategory? GetById(int id)
+    public async override Task<ArticleCategory?> GetById(int id)
     {
         var sql = @"SELECT Id, ArticleId, CategoryId FROM ArticleCategory WHERE Id = @Id";
         var parameters = new Dictionary<string, object>
@@ -20,7 +21,7 @@ public class ArticleCategoryRepository : BaseRepository<ArticleCategory, int>
             ["@Id"] = id
         };
 
-        using var reader = _databaseConnection.ExecuteReader(sql, parameters);
+        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
         if (reader.Read())
         {
             return MapFromReader(reader);
@@ -29,12 +30,12 @@ public class ArticleCategoryRepository : BaseRepository<ArticleCategory, int>
         return null;
     }
 
-    public override List<ArticleCategory> GetAll()
+    public async override Task<List<ArticleCategory>> GetAll()
     {
         var sql = @"select * from ArticleCategory";
         var articlesCategories = new List<ArticleCategory>();
         
-        using var reader = _databaseConnection.ExecuteReader(sql);
+        using var reader = await _databaseConnection.ExecuteReader(sql);
         if (reader.Read())
         {
             articlesCategories.Add(MapFromReader(reader));
@@ -43,15 +44,8 @@ public class ArticleCategoryRepository : BaseRepository<ArticleCategory, int>
         return articlesCategories;
     }
 
-    public override bool Create(ArticleCategory artCtg)
+    public async override Task<bool> Create(ArticleCategory artCtg)
     {
-        var isAlreadyExists = GetById(artCtg.Id) != null;
-
-        if (isAlreadyExists)
-        {
-            return false;
-        }
-        
         var createSql = @"insert into ArticleCategory (Id, ArticleId, CategoryId) 
                 values (@Id, @ArticleId, @CategoryId);";
         var createParameters = new Dictionary<string, object>
@@ -61,18 +55,10 @@ public class ArticleCategoryRepository : BaseRepository<ArticleCategory, int>
             ["@CategoryId"] = artCtg.CategoryId
         };
 
-        try
-        {
-            _databaseConnection.ExecuteNonQuery(createSql, createParameters);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return await _databaseConnection.ExecuteNonQuery(createSql, createParameters) > 0;
     }
 
-    public override bool Update(ArticleCategory artCtg)
+    public async override Task<bool> Update(ArticleCategory artCtg)
     {
         var sql = @"update ArticleCategory 
                 set ArticleId = @ArticleId, CategoryId = @CategoryId
@@ -84,18 +70,10 @@ public class ArticleCategoryRepository : BaseRepository<ArticleCategory, int>
             ["@CategoryId"] = artCtg.CategoryId
         };
 
-        try
-        {
-            _databaseConnection.ExecuteNonQuery(sql, parameters);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
     }
 
-    public override bool Delete(int id)
+    public async override Task<bool> Delete(int id)
     {
         var sql = @"delete from ArticleCategory where Id = @Id";
         var parameters = new Dictionary<string, object>
@@ -103,15 +81,7 @@ public class ArticleCategoryRepository : BaseRepository<ArticleCategory, int>
             ["@Id"] = id,
         };
 
-        try
-        {
-            _databaseConnection.ExecuteNonQuery(sql, parameters);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
     }
 
     protected override ArticleCategory MapFromReader(IDataReader reader)

@@ -1,5 +1,6 @@
 using System.Data;
 using knowledgeBase.Entities;
+using knowledgeBase.DataBase;
 
 namespace knowledgeBase.Repositories;
 
@@ -12,7 +13,7 @@ public class SessionRepository : BaseRepository<Session, string>
         _databaseConnection = databaseConnection;
     }
     
-    public override Session? GetById(string sessionId)
+    public async override Task<Session?> GetById(string sessionId)
     {
         var sql = @"SELECT Id, Email, Password, Name, RoleId FROM Sessions WHERE Id = @Id";
         var parameters = new Dictionary<string, object>
@@ -20,7 +21,7 @@ public class SessionRepository : BaseRepository<Session, string>
             ["@Id"] = sessionId
         };
         
-        using var reader = _databaseConnection.ExecuteReader(sql, parameters);
+        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
         if (reader.Read())
         {
             return MapFromReader(reader);
@@ -29,12 +30,12 @@ public class SessionRepository : BaseRepository<Session, string>
         return null;
     }
 
-    public override List<Session> GetAll()
+    public async override Task<List<Session>> GetAll()
     {
         var sql = @"select * from Sessions";
         var sessions = new List<Session>();
         
-        using var reader = _databaseConnection.ExecuteReader(sql);
+        using var reader = await _databaseConnection.ExecuteReader(sql);
         if (reader.Read())
         {
             sessions.Add(MapFromReader(reader));
@@ -43,15 +44,8 @@ public class SessionRepository : BaseRepository<Session, string>
         return sessions;
     }
 
-    public override bool Create(Session session)
+    public async override Task<bool> Create(Session session)
     {
-        var isAlreadyExists = GetById(session.SesisonId) != null;
-
-        if (isAlreadyExists)
-        {
-            return false;
-        }
-        
         var createSql = @"insert into Session (SessionId, User, EndTime) 
                 values (@SessionId, @User, @EndTime);";
         var createParameters = new Dictionary<string, object>
@@ -61,18 +55,10 @@ public class SessionRepository : BaseRepository<Session, string>
             ["@EndTime"] = session.EndTime
         };
 
-        try
-        {
-            _databaseConnection.ExecuteNonQuery(createSql, createParameters);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return await _databaseConnection.ExecuteNonQuery(createSql, createParameters) > 0;
     }
 
-    public override bool Update(Session session)
+    public async override Task<bool> Update(Session session)
     {
         var sql = @"update Session 
                 set User = @User, EndTime = @EndTime 
@@ -84,18 +70,10 @@ public class SessionRepository : BaseRepository<Session, string>
             ["@EndTime"] = session.EndTime
         };
 
-        try
-        {
-            _databaseConnection.ExecuteNonQuery(sql, parameters);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
     }
 
-    public override bool Delete(string sessionId)
+    public async override Task<bool> Delete(string sessionId)
     {
         var sql = @"delete from Session where SessionId = @SessionId";
         var parameters = new Dictionary<string, object>
@@ -103,15 +81,7 @@ public class SessionRepository : BaseRepository<Session, string>
             ["@SessionId"] = sessionId,
         };
 
-        try
-        {
-            _databaseConnection.ExecuteNonQuery(sql, parameters);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
     }
 
     protected override Session MapFromReader(IDataReader reader)
