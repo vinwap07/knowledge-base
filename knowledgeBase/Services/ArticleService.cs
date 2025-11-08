@@ -8,24 +8,67 @@ public class ArticleService
     private ArticleRepository _articleRepository;
     private CategoryRepository _categoryRepository;
     private ArticleCategoryRepository _articleCategoryRepository;
-
-    public Article GetArticleWithAccessCheck(int articleId, int? employeeId)
+    private SessionRepository _sessionRepository;
+    public async Task<bool> CreateArticle(Article article, List<string> categories, string sessionId)
     {
+        var userRole = await _sessionRepository.GetRoleBySessionId(sessionId);
+
+        if (userRole != "admin")
+        {
+            return false;
+        }
+        // TODO: валидация статьи
         
+        var isArticleAdded = await _articleRepository.Create(article);
+        var articles = await _articleRepository.GetByTitle(article.Title);
+        int articleId = 0;
+        
+        if (isArticleAdded)
+        {
+            foreach (var art in articles)
+            {
+                if (art.Title == article.Title)
+                {
+                    articleId = art.Id;
+                    break;
+                }
+            }
+
+            foreach (var category in categories)
+            {
+                await _articleCategoryRepository.Create(new ArticleCategory()
+                    { ArticleId = articleId, CategoryId = category });
+            }
+        }
+        
+        return isArticleAdded;
     }
 
-    public bool CreateArticle(Article article, int authorId, List<int> categoryIds)
+    public async Task<List<Article>> SearchArticles(string query, int? categoryId = null)
     {
+        var articles = new List<Article>();
         
+        if (categoryId.HasValue)
+        {
+            articles = await _articleRepository.GetByCategoryId(categoryId.Value);
+        }
+        else
+        {
+            articles = await _articleRepository.GetAll();
+        }
+
+        return articles;
     }
 
-    public List<Article> SearchArticles(string query, int? categoryId = null)
+    public async Task<bool> DeleteArticle(Article article, string sessionId)
     {
+        var user = await _sessionRepository.GetUserBySessionId(sessionId);
+        var isDeleted = false;
+        if (article.Author == user.Email)
+        {
+            isDeleted = await _articleRepository.Delete(article.Id); 
+        }
         
-    }
-
-    public List<Article> GetArticlesForOnboarding(int departmentId)
-    {
-        
+        return isDeleted;
     }
 }
