@@ -9,6 +9,7 @@ public class ArticleService
     private CategoryRepository _categoryRepository;
     private ArticleCategoryRepository _articleCategoryRepository;
     private SessionRepository _sessionRepository;
+    private UserArticleRepository _userArticleRepository;
     public async Task<bool> CreateArticle(Article article, List<string> categories, string sessionId)
     {
         var userRole = await _sessionRepository.GetRoleBySessionId(sessionId);
@@ -44,7 +45,7 @@ public class ArticleService
         return isArticleAdded;
     }
 
-    public async Task<List<Article>> SearchArticles(string query, int? categoryId = null)
+    public async Task<List<Article>> SearchArticles(int? categoryId = null)
     {
         var articles = new List<Article>();
         
@@ -70,5 +71,17 @@ public class ArticleService
         }
         
         return isDeleted;
+    }
+
+    public async Task<bool> AddToFavorite(int articleId, string sessionId)
+    {
+        var user = await _sessionRepository.GetUserBySessionId(sessionId);
+        return await _userArticleRepository.Create(new UserArticle() {Article = articleId, User = user.Email});
+    }
+
+    public async Task<bool> RemoveFromFavorite(int articleId, string sessionId)
+    {
+        var user = await _sessionRepository.GetUserBySessionId(sessionId);
+        return await _userArticleRepository.Delete((user.Email, articleId));
     }
 }

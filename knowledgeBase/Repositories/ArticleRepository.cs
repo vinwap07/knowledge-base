@@ -26,13 +26,13 @@ public class ArticleRepository : BaseRepository<Article, int>
         using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
         if (reader.Read())
         {
-            articles.Add(MapFromReader(reader));
+            articles.Add(Mapper.MapToArticle(reader));
         }
         
         return articles;
     }
     
-    public async override Task<Article?> GetById(int id)
+    public async override Task<Article> GetById(int id)
     {
         var sql = @"select * from Article where Id = @Id";
         var parameters = new Dictionary<string, object>
@@ -43,10 +43,27 @@ public class ArticleRepository : BaseRepository<Article, int>
         using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
         if (reader.Read())
         {
-            return MapFromReader(reader);
+            return Mapper.MapToArticle(reader);
         }
         
         return null;
+    }
+
+    public async Task<List<Article>> GetByTitle(string title)
+    {
+        var sql = @"select * from Article where Title = @title";
+        var parameters = new Dictionary<string, object>
+        {
+            ["@title"] = title
+        };
+        var articles = new List<Article>();
+        
+        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
+        if (reader.Read())
+        {
+            articles.Add(Mapper.MapToArticle(reader));
+        }
+        return articles;
     }
 
     public async override Task<List<Article>> GetAll()
@@ -57,7 +74,7 @@ public class ArticleRepository : BaseRepository<Article, int>
         using var reader = await _databaseConnection.ExecuteReader(sql);
         if (reader.Read())
         {
-            articles.Add(MapFromReader(reader));
+            articles.Add(Mapper.MapToArticle(reader));
         }
         
         return articles;
@@ -105,17 +122,5 @@ public class ArticleRepository : BaseRepository<Article, int>
         };
 
         return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
-    }
-
-    protected override Article MapFromReader(IDataReader reader)
-    {
-        return new Article()
-        {
-            Id = (int)reader["Id"],
-            Title = (string)reader["Title"],
-            Content = (string)reader["Content"],
-            Author = (string)reader["Author"],
-            PublishDate = (DateOnly)reader["PublishDate"],
-        };
     }
 }

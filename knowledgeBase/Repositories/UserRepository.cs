@@ -13,7 +13,7 @@ public class UserRepository: BaseRepository<User, string>
         _databaseConnection = databaseConnection;
     }
     
-    public async override Task<User?> GetById(string email)
+    public async override Task<User> GetById(string email)
     {
         var sql = @"select * from User where Email = @Email";
         var parameters = new Dictionary<string, object>
@@ -24,7 +24,7 @@ public class UserRepository: BaseRepository<User, string>
         using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
         if (reader.Read())
         {
-            return MapFromReader(reader);
+            return Mapper.MapToUser(reader);
         }
         
         return null;
@@ -38,7 +38,7 @@ public class UserRepository: BaseRepository<User, string>
         using var reader = await _databaseConnection.ExecuteReader(sql);
         if (reader.Read())
         {
-            users.Add(MapFromReader(reader));
+            users.Add(Mapper.MapToUser(reader));
         }
         
         return users;
@@ -62,8 +62,8 @@ public class UserRepository: BaseRepository<User, string>
     public async override Task<bool> Update(User user)
     {
         var sql = @"update user
-                set Name = @Name, Email = @Email, Password = @Password, RoleId = @RoleId 
-                where Id = @Id";
+                set Name = @Name, Password = @Password, RoleId = @RoleId 
+                where Email = @Email";
         var parameters = new Dictionary<string, object>
         {
             ["@Email"] = user.Email,
@@ -84,16 +84,5 @@ public class UserRepository: BaseRepository<User, string>
         };
 
         return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
-    }
-
-    protected override User MapFromReader(IDataReader reader)
-    {
-        return new User
-        {
-            Email = (string)reader["Email"],
-            Name = (string)reader["Name"],
-            Password = (string)reader["Password"],
-            RoleId = (int)reader["RoleId"]
-        };
     }
 }

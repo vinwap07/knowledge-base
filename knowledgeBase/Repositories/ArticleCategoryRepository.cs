@@ -13,7 +13,7 @@ public class ArticleCategoryRepository : BaseRepository<ArticleCategory, int>
         _databaseConnection = databaseConnection;
     }
     
-    public async override Task<ArticleCategory?> GetById(int id)
+    public async override Task<ArticleCategory> GetById(int id)
     {
         var sql = @"SELECT Id, ArticleId, CategoryId FROM ArticleCategory WHERE Id = @Id";
         var parameters = new Dictionary<string, object>
@@ -24,7 +24,7 @@ public class ArticleCategoryRepository : BaseRepository<ArticleCategory, int>
         using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
         if (reader.Read())
         {
-            return MapFromReader(reader);
+            return Mapper.MapToArticleCategory(reader);
         }
 
         return null;
@@ -38,7 +38,7 @@ public class ArticleCategoryRepository : BaseRepository<ArticleCategory, int>
         using var reader = await _databaseConnection.ExecuteReader(sql);
         if (reader.Read())
         {
-            articlesCategories.Add(MapFromReader(reader));
+            articlesCategories.Add(Mapper.MapToArticleCategory(reader));
         }
         
         return articlesCategories;
@@ -82,15 +82,5 @@ public class ArticleCategoryRepository : BaseRepository<ArticleCategory, int>
         };
 
         return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
-    }
-
-    protected override ArticleCategory MapFromReader(IDataReader reader)
-    {
-        return new ArticleCategory()
-        {
-            Id = (int)reader["Id"],
-            ArticleId = (int)reader["ArticleId"],
-            CategoryId = (int)reader["CategoryId"]
-        };
     }
 }

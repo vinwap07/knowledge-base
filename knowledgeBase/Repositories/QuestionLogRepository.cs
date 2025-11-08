@@ -13,7 +13,7 @@ public class QuestionLogRepository : BaseRepository<QuestionLog, int>
         _databaseConnection = databaseConnection;
     }
 
-    public async override Task<QuestionLog?> GetById(int id)
+    public async override Task<QuestionLog> GetById(int id)
     {
         var sql = @"SELECT Id, Question, Answer, Assessment, UserComment FROM Sessions WHERE Id = @Id";
         var parameters = new Dictionary<string, object>
@@ -24,7 +24,7 @@ public class QuestionLogRepository : BaseRepository<QuestionLog, int>
         using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
         if (reader.Read())
         {
-            return MapFromReader(reader);
+            return Mapper.MapToQuestionLog(reader);
         }
 
         return null;
@@ -38,7 +38,7 @@ public class QuestionLogRepository : BaseRepository<QuestionLog, int>
         using var reader = await _databaseConnection.ExecuteReader(sql);
         if (reader.Read())
         {
-            questionLogs.Add(MapFromReader(reader));
+            questionLogs.Add(Mapper.MapToQuestionLog(reader));
         }
         
         return questionLogs;
@@ -86,17 +86,5 @@ public class QuestionLogRepository : BaseRepository<QuestionLog, int>
         };
 
         return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
-    }
-
-    protected override QuestionLog MapFromReader(IDataReader reader)
-    {
-        return new QuestionLog()
-        {
-            Id = (int)reader["Id"],
-            Question = (string)reader["Question"],
-            Answer = (string)reader["Answer"],
-            Assessment = (int)reader["Assessment"],
-            UserComment = (string)reader["UserComment"]
-        };
     }
 }

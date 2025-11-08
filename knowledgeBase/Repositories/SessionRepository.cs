@@ -13,7 +13,7 @@ public class SessionRepository : BaseRepository<Session, string>
         _databaseConnection = databaseConnection;
     }
     
-    public async override Task<Session?> GetById(string sessionId)
+    public async override Task<Session> GetById(string sessionId)
     {
         var sql = @"SELECT Id, Email, Password, Name, RoleId FROM Sessions WHERE Id = @Id";
         var parameters = new Dictionary<string, object>
@@ -24,7 +24,7 @@ public class SessionRepository : BaseRepository<Session, string>
         using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
         if (reader.Read())
         {
-            return MapFromReader(reader);
+            return Mapper.MapToSession(reader);
         }
         
         return null;
@@ -38,7 +38,7 @@ public class SessionRepository : BaseRepository<Session, string>
         using var reader = await _databaseConnection.ExecuteReader(sql);
         if (reader.Read())
         {
-            sessions.Add(MapFromReader(reader));
+            sessions.Add(Mapper.MapToSession(reader));
         }
         
         return sessions;
@@ -84,13 +84,40 @@ public class SessionRepository : BaseRepository<Session, string>
         return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
     }
 
-    protected override Session MapFromReader(IDataReader reader)
+    public async Task<User> GetUserBySessionId(string sessionId)
     {
-        return new Session()
+        var sql = @"select user.Email, user.Password, user.Name, user.RoleId 
+                    from Sessions join User on Sessions.User = user.Email
+                    where SessionId = @SessionId";
+        var parameters = new Dictionary<string, object>
         {
-            SesisonId = (string)reader["SessionId"],
-            User = (string)reader["User"],
-            EndTime = (DateTime)reader["EndTime"],
+            ["@SessionId"] = sessionId
         };
+        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
+        if (reader.Read())
+        {
+            return Mapper.MapToUser(reader);
+        }
+        
+        return null;
     }
+
+    public async Task<string> GetRoleBySessionId(string sessionId)
+    {
+        var sql = @"SELECT Role.Name 
+                    FROM Sessions JOIN User ON Sessions.User = user.Email
+                    JOIN Role ON Role.RoleId = user.RoleId
+                    WHERE SessionId = @SessionId";
+        var parameters = new Dictionary<string, object>
+        {
+            ["@SessionId"] = sessionId
+        };
+        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
+        if (reader.Read())
+        {
+            return (string)reader["Role.Name"];
+        }
+        return null;
+    }
+    
 }

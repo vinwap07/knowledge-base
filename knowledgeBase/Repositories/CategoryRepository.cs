@@ -4,7 +4,7 @@ using knowledgeBase.DataBase;
 
 namespace knowledgeBase.Repositories;
 
-public class CategoryRepository : BaseRepository<Category, int>
+public class CategoryRepository : BaseRepository<Category, string>
 {
     private readonly IDatabaseConnection _databaseConnection;
     
@@ -13,18 +13,18 @@ public class CategoryRepository : BaseRepository<Category, int>
         _databaseConnection = databaseConnection;
     }
     
-    public async override Task<Category?> GetById(int id)
+    public async override Task<Category> GetById(string name)
     {
-        var sql = @"select * from Category where Id = @Id";
+        var sql = @"select * from Category where Name = @Name";
         var parameters = new Dictionary<string, object>
         {
-            ["@Id"] = id
+            ["@Name"] = name
         };
         
         using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
         if (reader.Read())
         {
-            return MapFromReader(reader);
+            return Mapper.MapToCategory(reader);
         }
         
         return null;
@@ -38,7 +38,7 @@ public class CategoryRepository : BaseRepository<Category, int>
         using var reader = await _databaseConnection.ExecuteReader(sql);
         if (reader.Read())
         {
-            questionLogs.Add(MapFromReader(reader));
+            questionLogs.Add(Mapper.MapToCategory(reader));
         }
         
         return questionLogs;
@@ -46,11 +46,10 @@ public class CategoryRepository : BaseRepository<Category, int>
 
     public async override Task<bool> Create(Category category)
     {
-        var createSql = @"insert into Category (Id, Name, Slug) 
-                values (@Id, @Name, @Slug);";
+        var createSql = @"insert into Category (Name, Slug) 
+                values (@Name, @Slug);";
         var createParameters = new Dictionary<string, object>
         {
-            ["@Id"] = category.Id,
             ["@Name"] = category.Name,
             ["@Slug"] = category.Slug
         };
@@ -61,11 +60,10 @@ public class CategoryRepository : BaseRepository<Category, int>
     public async override Task<bool> Update(Category category)
     {
         var sql = @"update Category
-                set Name = @Name, Slug = @Slug
-                where Id = @Id";
+                set Slug = @Slug
+                where Name = @Name";
         var parameters = new Dictionary<string, object>
         {
-            ["@Id"] = category.Id,
             ["@Name"] = category.Name,
             ["@Slug"] = category.Slug
         };
@@ -73,25 +71,15 @@ public class CategoryRepository : BaseRepository<Category, int>
         return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
     }
 
-    public async override Task<bool> Delete(int id)
+    public async override Task<bool> Delete(string name)
     {
-        var sql = @"delete from Category where Id = @Id";
+        var sql = @"delete from Category where Name = @Name";
         var parameters = new Dictionary<string, object>
         {
-            ["@Id"] = id,
+            ["@Name"] = name,
         };
 
         return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
-    }
-
-    protected override Category MapFromReader(IDataReader reader)
-    {
-        return new Category()
-        {
-            Id = (int)reader["Id"],
-            Name = (string)reader["Name"],
-            Slug = (string)reader["Slug"]
-        };
     }
 }
 
