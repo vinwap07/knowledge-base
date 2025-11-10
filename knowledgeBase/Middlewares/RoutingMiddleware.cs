@@ -22,6 +22,10 @@ public class RoutingMiddleware : IMiddleware
         };
         
         var result = await controller.HandleRequest();
+        context.Response.StatusCode = (int)HttpStatusCode.OK;
+        context.Response.ContentType = "application/json";
+        await context.Response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes(result.ToString()));
+            
     }
 }
 

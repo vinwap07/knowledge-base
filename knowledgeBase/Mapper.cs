@@ -49,15 +49,6 @@ public static class Mapper
         };
     }
 
-    public static Role MapToRole(IDataReader reader)
-    {
-        return new Role()
-        {
-            RoleId = (int)reader["Id"],
-            Name = (string)reader["Name"]
-        };
-    }
-
     public static Category MapToCategory(IDataReader reader)
     {
         return new Category()

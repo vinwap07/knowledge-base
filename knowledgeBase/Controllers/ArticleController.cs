@@ -27,14 +27,7 @@ public class ArticleController : BaseController
                 }
                 break;
             case "POST":
-                if (Context.Request.Url.LocalPath == "/article/toFavorite")
-                {
-                    return await AddAToFavorite();
-                }
-                else if (Context.Request.Url.LocalPath == "/article/toUnfavorite")
-                {
-                    return await RemoveFromFavorite();
-                }
+                \
                 break;
             case "DELETE":
                 
@@ -42,25 +35,5 @@ public class ArticleController : BaseController
             default:
                 
         }
-    }
-
-    private async Task<string> AddAToFavorite()
-    {
-        var query = Context.Request.QueryString;
-        var articleId = query["articleId"];
-        var cookie = Context.Request.Cookies["SessionId"];
-        var sessionId = cookie?.Value;
-        
-        return await _articleService.AddToFavorite(int.Parse(articleId), sessionId) ? "True" : "False";
-    }
-
-    private async Task<string> RemoveFromFavorite()
-    {
-        var query = Context.Request.QueryString;
-        var articleId = query["articleId"];
-        var cookie = Context.Request.Cookies["SessionId"];
-        var sessionId = cookie?.Value;
-        
-        return await _articleService.RemoveFromFavorite(int.Parse(articleId), sessionId) ? "True" : "False";
     }
 }

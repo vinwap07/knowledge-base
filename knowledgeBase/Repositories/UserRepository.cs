@@ -27,7 +27,7 @@ public class UserRepository: BaseRepository<User, string>
             return Mapper.MapToUser(reader);
         }
         
-        return null;
+        return new User();
     }
 
     public async override Task<List<User>> GetAll()
@@ -84,5 +84,89 @@ public class UserRepository: BaseRepository<User, string>
         };
 
         return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
+    }
+    
+    public async Task<List<Article>> GetFavorileArticles(string email)
+    {
+        var sql = @"SELECT Article.*
+                    FROM UserArticle JOIN Article ON UserArticle.Article = Article.Id 
+                    WHERE UserArticle.User = @email";
+        var parameters = new Dictionary<string, object>
+        {
+            { "@email", email }
+        };
+        
+        var articles = new List<Article>();
+        
+        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
+        if (reader.Read())
+        {
+            articles.Add(Mapper.MapToArticle(reader));
+        }
+        
+        return articles;
+    }
+
+    public async Task<bool> AddArticleToFavorite(string email, int articleId)
+    {
+        var sql = @"INSERT INTO UserArticle (User, Article)
+                    VALUES (@User, @ArticleId)";
+        var parameters = new Dictionary<string, object>
+        {
+            ["@User"] = email,
+            ["@ArticleId"] = articleId
+        };
+        
+        return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
+    }
+
+    public async Task<bool> RemoveArticleFromFavorite(string email, int articleId)
+    {
+        var sql = @"DELETE FROM UserArticle
+                    WHERE user = @user AND article = @article;";
+        var parameters = new Dictionary<string, object>
+        {
+            ["@user"] = email,
+            ["@article"] = articleId
+        };
+
+        return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
+    }
+    
+    public async Task<string> GetRoleById(int id)
+    {
+        var sql = @"select * from Role where RoleId = @Id";
+        var parameters = new Dictionary<string, object>
+        {
+            ["@Id"] = id
+        };
+        
+        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
+        if (reader.Read())
+        {
+            return (string)reader["Name"];
+        }
+        
+        return "unknown";
+    }
+
+    public async Task<List<Article>> GetAllFavoriteArticles(string email)
+    {
+        var sql = @"SELECT Article.*
+                    FROM Article JOIN UserArticle ON UserArticle.Article = Article.Id
+                    WHERE UserArticle.User = @email";
+        var parameters = new Dictionary<string, object>
+        {
+            ["@email"] = email
+        };
+        var articles = new List<Article>();
+        
+        using var reader = await _databaseConnection.ExecuteReader(sql);
+        if (reader.Read())
+        {
+            articles.Add(Mapper.MapToArticle(reader));
+        }
+        
+        return articles;
     }
 }
