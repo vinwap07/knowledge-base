@@ -1,8 +1,0 @@
-{
-  "DatabaseConnectionString": "Host=localhost;Username=postgres;Password=vinwap07;Database=knowledge_base",
-  "ApiKey": "7720213b2601450c9e5e755f2ac9c074.FsgjMO1mFUzOFYeYwx9Gp917", 
-  "LogFilePath" : "", 
-  "LogErrorFilePath" : "",
-  "StaticFilesPath": "public/", 
-  "TemplatesPath": ""
-}
