@@ -30,6 +30,7 @@ class CategoriesPage {
             }
 
             const categoriesData = await response.json();
+            console.log(categoriesData);
             this.categories = categoriesData;
             this.displayCategories();
             this.updateStats();
@@ -60,7 +61,7 @@ class CategoriesPage {
                     <span class="articles-count">${category.articlesCount || 0} статей</span>
                 </div>
                 
-                <a href="/articles.html?category=${category.id}" class="category-link">
+                <a href="http://localhost:5000/article/category/${category.slug}" class="category-link">
                     Смотреть статьи →
                 </a>
             </div>

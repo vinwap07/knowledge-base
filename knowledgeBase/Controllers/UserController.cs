@@ -76,19 +76,23 @@ public class UserController : BaseController
 		    };
 
 		    var incomingUser = JsonSerializer.Deserialize<User>(body, options);
-		    var user = await _userService.Authenticate(incomingUser);
-
-		    if (user.Email != null)
+		    var authResult = await _userService.Authenticate(incomingUser);
+		    var isAuth = authResult.Item1;
+		    var resultString = authResult.Item2;
+		    var user = authResult.Item3;
+		    
+		    if (isAuth)
 		    {
+				var role = await _userService.GetUserRole(user);
 			    var sessionId = await _userService.CreateSession(user);
 			    CookieHelper.SetCookie(context.Response, sessionId, "SessionID");
 			    CookieHelper.SetCookie(context.Response, user.Name, "Name");
-			    var userProfile = DTOMaker.MapUser(user, context.Role);
+			    var userProfile = DTOMaker.MapUser(user, role);
 			    await SendJsonAsync(context.Response, userProfile);
 		    }
 		    else
 		    {
-			    await SendTextAsync(context.Response, "Wrong email or password");
+			    await SendTextAsync(context.Response, resultString == string.Empty? "Wrong email or password" : resultString );
 		    }
 	    }
 	    catch (JsonException ex)
@@ -122,29 +126,43 @@ public class UserController : BaseController
         
         try
 	    {
+		    // TODO: убрать switch и всю логику в сервис 
 		    var result = await _userService.RegisterNewUser(user);
-		    if (result == "Email already exists")
+		    switch (result)
 		    {
-			    await SendTextAsync(context.Response, "Данный адрес электронной почты уже зарегистрирован");
+			    case "Email already exists":
+				    await SendTextAsync(context.Response, "Данный адрес электронной почты уже зарегистрирован");
+				    break;
+			    case "OK":
+				    var sessionId = await _userService.CreateSession(user);
+				    if (sessionId != null)
+				    {
+					    CookieHelper.SetCookie(context.Response, sessionId, "SessionID");
+					    CookieHelper.SetCookie(context.Response, user.Name, "Name");
+					    await SendJsonAsync(context.Response, string.Empty);
+				    }
+				    else
+				    {
+					    await SendTextAsync(context.Response, "Что-то пошло не так, попробуйте снова");
+				    }
+				    
+				    break;
+			    default:
+				    await SendTextAsync(context.Response, result);
+				    break;
 		    }
-		    else
-		    {
-			    var sessionId = await _userService.CreateSession(user);
-			    if (sessionId != null)
-			    {
-				    CookieHelper.SetCookie(context.Response, sessionId, "SessionID");
-				    CookieHelper.SetCookie(context.Response, user.Name, "Name");
-				    await SendJsonAsync(context.Response, string.Empty);
-			    }
-			    else
-			    {
-				    await SendTextAsync(context.Response, "Что-то пошло не так, попробуйте снова");
-			    }
-		    }
+
 	    }
 	    catch (Exception ex)
 	    {
 		    throw new ArgumentException(ex.Message);
 	    }
+    }
+
+    public async Task AddModerator(HttpContext context, Dictionary<string, string> parameters)
+    {
+	    var moderator = parameters["moderator"];
+	    var isAdded = await _userService.AddModerator(moderator, context.Role);
+	    await SendTextAsync(context.Response, isAdded.ToString());
     }
 }

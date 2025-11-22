@@ -1,15 +1,7 @@
--- Создание таблицы пользователей
 CREATE TABLE IF NOT EXISTS "Role"(
     id SERIAL PRIMARY KEY, 
     name VARCHAR(15) 
 );
-
-INSERT INTO "Role" (Id, Name)
-VALUES
-    (1, 'User'),
-    (2, 'Admin'),
-    (3, 'Moderator')
-ON CONFLICT (Id) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS "User" (
     Email VARCHAR(100) NOT NULL UNIQUE,
@@ -20,12 +12,6 @@ CREATE TABLE IF NOT EXISTS "User" (
     FOREIGN KEY (RoleId) REFERENCES "Role"(id) ON DELETE CASCADE                           
 );
 
-INSERT INTO "User" (Email, Password, name, RoleId)
-VALUES
-    ('admin@gmail.com', 'X3sFq3xWxxUE2K1KWANwGg==;wAKDVZBX4E4Uk2Ry9hA4OBrWwQ5q9FAijbU+Ov0HwtQ=', 'admin', 2)
-ON CONFLICT (Email) DO NOTHING;
-
--- Создание таблицы сессий
 CREATE TABLE IF NOT EXISTS "Session" (
     SessionId VARCHAR(100) NOT NULL UNIQUE,
     UserEmail VARCHAR(100) NOT NULL,
@@ -34,7 +20,6 @@ CREATE TABLE IF NOT EXISTS "Session" (
     FOREIGN KEY (UserEmail) REFERENCES "User"(Email) ON DELETE CASCADE
 );
 
--- Создание таблицы категорий
 CREATE TABLE IF NOT EXISTS Category (
     slug VARCHAR(100) NOT NULL UNIQUE,
     "name" VARCHAR(100) NOT NULL,
@@ -44,12 +29,6 @@ CREATE TABLE IF NOT EXISTS Category (
     PRIMARY KEY ("slug")
 );
 
-INSERT INTO Category (slug, "name", description, icon) VALUES 
-('guides', 'Руководства', 'Пошаговые инструкции и руководства для начинающих и опытных пользователей', '📚'),
-('support', 'Техническая поддержка', 'Решение технических проблем и ответы на вопросы по настройке',  '🔧')
-ON CONFLICT (slug) DO NOTHING;
-
--- Создание таблицы статей
 CREATE TABLE IF NOT EXISTS Article (
     Id SERIAL PRIMARY KEY,
     Title VARCHAR(255) NOT NULL,

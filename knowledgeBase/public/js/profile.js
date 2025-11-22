@@ -1,6 +1,6 @@
 class ProfileManager {
     constructor() {
-        this.currentUser = null;
+        this.currentUser;
         this.userRole = 'user';
 
         // Инициализируем с обработкой ошибок
@@ -81,7 +81,6 @@ class ProfileManager {
             const userEmail = this.currentUser?.email || 'email@example.com';
             const userRole = this.currentUser?.role || 'user'
             
-            document.getElementById('userName').textContent = userName;
             document.getElementById('profileName').textContent = userName;
             document.getElementById('profileEmail').textContent = userEmail;
             document.getElementById('profileAvatar').textContent = this.getInitials(userName);
@@ -112,12 +111,7 @@ class ProfileManager {
         try {
             const myArticlesSection = document.getElementById('myArticlesSection');
             const adminSection = document.getElementById('createModeratorBtn');
-            const roleSwitcher = document.getElementById('roleSwitcher');
-
-            if (roleSwitcher) {
-                roleSwitcher.style.display = 'block';
-            }
-
+            
             if (this.userRole === 'user') {
                 if (myArticlesSection) myArticlesSection.style.display = 'none';
                 if (adminSection) adminSection.style.display = 'none';
@@ -226,22 +220,6 @@ class ProfileManager {
         }
     }
 
-    // Методы для переключения ролей (для демонстрации)
-    switchRole(role) {
-        try {
-            this.userRole = role;
-            this.currentUser.role = role;
-            localStorage.setItem('demoRole', role);
-            this.displayUserInfo();
-            this.updateUI();
-            this.loadMyArticles();
-
-            showNotification(`Роль изменена на: ${this.getRoleDisplayName(role)}`, 'success');
-        } catch (error) {
-            console.error('Ошибка переключения роли:', error);
-            showError('Ошибка при изменении роли');
-        }
-    }
 
     // Модальные окна
 
@@ -277,32 +255,36 @@ class ProfileManager {
             event.preventDefault();
             const formData = new FormData(event.target);
             const moderatorData = {
-                email: formData.get('email'),
-                permissions: {
-                    canCreateArticles: formData.get('canCreateArticles') === 'on',
-                    canEditArticles: formData.get('canEditArticles') === 'on',
-                    canDeleteArticles: formData.get('canDeleteArticles') === 'on',
-                    canManageComments: formData.get('canManageComments') === 'on'
-                }
+                email: formData.get('email')
             };
 
-            // В реальном приложении здесь был бы запрос к API
-            console.log('Назначение модератора:', moderatorData);
-            showNotification('Пользователь успешно назначен модератором!', 'success');
-            hideCreateModeratorModal();
+            const response = await fetch(`http://localhost:5000/user/addModerator/${moderatorData.email}`, {
+                method: 'POST'
+            });
+
+            if (!response.ok) {
+                return response.text().then(html => {
+                    document.open();
+                    document.write(html);
+                    document.close();
+                });
+            }
+            
+            let data = await response.text();
+            console.log(data);
+            
+            if (data === "True"){
+                showNotification(`${moderatorData.email} успешно назначен на роль модератора`, 'success');
+                document.getElementById('createModeratorModal').classList.remove('active');
+                document.getElementById('createModeratorForm').reset();   
+            } else {
+                showNotification(`Что-то пошло не так( попробуйте еще раз`, 'error');
+            }
+            
 
         } catch (error) {
             console.error('Ошибка назначения модератора:', error);
             showNotification('Ошибка при назначении модератора', 'error');
-        }
-    }
-
-    editProfile() {
-        try {
-            showNotification('Редактирование профиля', 'info');
-            // window.location.href = '/edit-profile.html';
-        } catch (error) {
-            console.error('Ошибка редактирования профиля:', error);
         }
     }
 

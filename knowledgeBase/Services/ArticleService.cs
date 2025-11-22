@@ -10,12 +10,14 @@ public class ArticleService
     private ArticleRepository _articleRepository;
     private SessionRepository _sessionRepository;
     private UserRepository _userRepository;
+    private IAiService _aiService;
 
-    public ArticleService(ArticleRepository articleRepository, SessionRepository sessionRepository, UserRepository userRepository)
+    public ArticleService(ArticleRepository articleRepository, SessionRepository sessionRepository, UserRepository userRepository, IAiService aiService)
     {
         _articleRepository = articleRepository;
         _sessionRepository = sessionRepository;
         _userRepository = userRepository;
+        _aiService = aiService;
     }
     public async Task<int> CreateArticle(string sessionId, Article article, string role)
     {
@@ -154,8 +156,8 @@ public class ArticleService
 
     private async Task<string> CreateSummary(string articleContent)
     {
-        var answer = await OllamaService.SendRequest(articleContent);
-        var ollamaResponse = JsonSerializer.Deserialize<OllamaResponse>(answer);
-        return ollamaResponse.Response;
+        var answer = await _aiService.SendRequest(articleContent);
+        var aiResponse = JsonSerializer.Deserialize<OllamaResponse>(answer);
+        return aiResponse.Response;
     }
 }

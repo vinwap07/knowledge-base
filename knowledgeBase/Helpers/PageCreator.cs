@@ -1,5 +1,6 @@
 using System.Net;
 using knowledgeBase.Entities;
+using knowledgeBase.View_Models;
 
 namespace knowledgeBase;
 
@@ -31,7 +32,70 @@ public static class PageCreator
         return html;
     }
 
-    public static string GetArticlePage(Article article)
+    public static string CreateArticlesByCategoryPage(Category category)
+    {
+        var page = @$"<!DOCTYPE html>
+<html lang=""ru"">
+<head>
+    <meta charset=""UTF-8"">
+    <title>Статьи</title>
+    <link rel=""stylesheet"" type=""text/css"" href=""http://localhost:5000/styles/main.css""/>
+    <link rel=""stylesheet"" type=""text/css"" href=""http://localhost:5000/styles/articles.css""/>
+    <script defer src=""http://localhost:5000/js/load-components.js""></script>
+    <script defer src=""http://localhost:5000/js/header-auth-checker.js""></script>
+    <script defer src=""http://localhost:5000/js/load-articles-by-category.js""></script>
+    <script defer src=""http://localhost:5000/js/create-article-card.js""></script>
+</head>
+<body>
+<div id=""header""></div>
+
+<div class=""articles-container"">
+    <div class=""articles-header"">
+        <h1 id=""category-title"" data-category-slug=""{category.Slug}"">{category.Name}</h1>
+        <p>Исследуйте всю коллекцию знаний нашей базы</p>
+
+        <!-- Поисковая строка -->
+        <div class=""search-box"">
+            <input type=""text"" id=""searchInput"" placeholder=""Поиск статей..."">
+            <button id=""searchBtn"">🔍</button>
+        </div>
+
+        <div class=""articles-filters"">
+            <select id=""sortFilter"" class=""filter-select"">
+                <option value=""newest"">Сначала новые</option>
+                <option value=""oldest"">Сначала старые</option>
+                <option value=""popular"">По популярности</option>
+            </select>
+        </div>
+
+        <!-- Теги активных фильтров -->
+        <div class=""filter-tags"" id=""filterTags"" style=""display: none;"">
+            <div class=""filter-tag"" id=""searchTag"" style=""display: none;"">
+                <span>Поиск: ""<span id=""searchTerm""></span>""</span>
+                <button class=""tag-remove"">×</button>
+            </div>
+            <button class=""clear-all-filters"">Очистить все</button>
+        </div>
+    </div>
+
+    <!-- Сетка статей -->
+    <div class=""articles-grid"" id=""articlesGrid"">
+        <div class=""loading-message"">Загрузка статей...</div>
+    </div>
+
+    <!-- Сообщение когда нет результатов -->
+    <div class=""no-results-message"" id=""noResultsMessage"" style=""display: none;"">
+        <h3>Статьи не найдены</h3>
+        <p>Попробуйте изменить параметры поиска</p>
+    </div>
+
+</div>
+</body>
+</html>";
+        return page;
+    }
+
+    public static string CreateArticlePage(Article article)
     {
         var likeBtnClass = article.IsLikedByUser ? "like-btn liked" : "like-btn";
         var readingTime = FormateReadingTime(article.ReadingTime);

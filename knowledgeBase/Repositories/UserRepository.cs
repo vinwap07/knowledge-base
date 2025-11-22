@@ -88,7 +88,7 @@ public class UserRepository: BaseRepository<User, string>
     
     public async Task<string> GetRoleByRoleId(int id)
     {
-        var sql = @"select name from ""Role"" where id = @Id";
+        var sql = @"select ""name"" from ""Role"" where id = @Id";
         var parameters = new Dictionary<string, object>
         {
             ["@Id"] = id
@@ -105,7 +105,7 @@ public class UserRepository: BaseRepository<User, string>
 
     public async Task<string> GetRoleByEmail(string email)
     {
-        var sql = @"SELECT ""Name"" from ""Role"" 
+        var sql = @"SELECT ""Role"".""name"" from ""Role"" 
                     JOIN ""User"" on ""Role"".Id = ""User"".RoleId
                     where Email = @Email ";
         var parameters = new Dictionary<string, object>

@@ -9,24 +9,22 @@ public class DatabaseInitializer
         _connection = connection;
     }
     
-    public async Task InitializeAsync()
+    public async Task InitializeAsync(string sqlCreateFilePath, string sqlInsertFilePath)
     {
-        await CreateTablesAsync();
-        // await SeedDataAsync();
+        await CreateTablesAsync(sqlCreateFilePath);
+        await SeedDataAsync(sqlInsertFilePath);
     }
     
-    private async Task CreateTablesAsync()
+    private async Task CreateTablesAsync(string sqlCreateFilePath)
     {
-        string sqlFilePath = "public/createDataBase.sql";
-
-        if (!File.Exists(sqlFilePath))
+        if (!File.Exists(sqlCreateFilePath))
         {
-            throw new FileNotFoundException($"SQL файл не найден: {sqlFilePath}");
+            throw new FileNotFoundException($"SQL файл не найден: {sqlCreateFilePath}");
         }
 
         try
         {
-            using var fileStream = File.Open(sqlFilePath, FileMode.Open);
+            using var fileStream = File.Open(sqlCreateFilePath, FileMode.Open);
             using var reader = new StreamReader(fileStream);
         
             string sql = await reader.ReadToEndAsync();
@@ -44,19 +42,30 @@ public class DatabaseInitializer
         }
     }
     
-    private async Task SeedDataAsync()
+    private async Task SeedDataAsync(string sqlInsertFilePath)
     {
-        var result = await _connection.ExecuteScalar(
-            "SELECT COUNT(*) FROM Users");
-        bool isInt = int.TryParse((string?)result, out var userCount);
-        
-        if (userCount == 0)
+        if (!File.Exists(sqlInsertFilePath))
         {
-            var file = File.Open("/addEntities.sql", FileMode.Open);
-            var reader = new StreamReader(file);
-            string sql = reader.ReadToEnd();
+            throw new FileNotFoundException($"SQL файл не найден: {sqlInsertFilePath}");
+        }
+
+        try
+        {
+            using var fileStream = File.Open(sqlInsertFilePath, FileMode.Open);
+            using var reader = new StreamReader(fileStream);
         
+            string sql = await reader.ReadToEndAsync();
+        
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                throw new InvalidOperationException("SQL файл пуст");
+            }
+
             await _connection.ExecuteNonQuery(sql);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Ошибка при выполнении SQL скрипта: {ex.Message}", ex);
         }
     }
 }

@@ -15,7 +15,7 @@
 
 <div class="articles-container">
     <div class="articles-header">
-        <h1>Все статьи</h1>
+        <h1 id="category-title">Все статьи</h1>
         <p>Исследуйте всю коллекцию знаний нашей базы</p>
 
         <!-- Поисковая строка -->
@@ -25,9 +25,6 @@
         </div>
 
         <div class="articles-filters">
-            <select id="categoryFilter" class="filter-select">
-                <option value="">Все категории</option>
-            </select>
             <select id="sortFilter" class="filter-select">
                 <option value="newest">Сначала новые</option>
                 <option value="oldest">Сначала старые</option>
@@ -39,10 +36,6 @@
         <div class="filter-tags" id="filterTags" style="display: none;">
             <div class="filter-tag" id="searchTag" style="display: none;">
                 <span>Поиск: "<span id="searchTerm"></span>"</span>
-                <button class="tag-remove">×</button>
-            </div>
-            <div class="filter-tag" id="categoryTag" style="display: none;">
-                <span>Категория: "<span id="categoryName"></span>"</span>
                 <button class="tag-remove">×</button>
             </div>
             <button class="clear-all-filters">Очистить все</button>
@@ -57,8 +50,9 @@
     <!-- Сообщение когда нет результатов -->
     <div class="no-results-message" id="noResultsMessage" style="display: none;">
         <h3>Статьи не найдены</h3>
-        <p>Попробуйте изменить параметры поиска или фильтры</p>
+        <p>Попробуйте изменить параметры поиска</p>
     </div>
+
 </div>
 </body>
 </html>

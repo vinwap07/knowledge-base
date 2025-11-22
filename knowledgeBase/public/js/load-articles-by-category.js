@@ -2,13 +2,11 @@ class ArticlesPage {
     constructor() {
         this.allArticles = [];
         this.filteredArticles = [];
-        this.categories = [];
         this.filters = {
             search: '',
-            category: '',
             sort: 'newest'
         };
-        
+
         this.init();
     }
 
@@ -21,8 +19,9 @@ class ArticlesPage {
     async loadArticles() {
         try {
             this.showLoading(true);
-
-            const response = await fetch('http://localhost:5000/article', {
+            let category = document.getElementById('category-title');
+            let slug = category.dataset.categorySlug;
+            const response = await fetch(`http://localhost:5000/category/articles/${slug}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -51,7 +50,6 @@ class ArticlesPage {
                 });
             });
 
-            this.extractCategories();
             this.applyFilters();
 
         } catch (error) {
@@ -61,38 +59,6 @@ class ArticlesPage {
             this.showLoading(false);
         }
     }
-
-    extractCategories() {
-        const categoriesSet = new Set();
-        this.allArticles.forEach(article => {
-            if (article.category) {
-                categoriesSet.add(article.category);
-            }
-        });
-
-        this.categories = Array.from(categoriesSet);
-        this.populateCategoryFilter();
-    }
-
-    populateCategoryFilter() {
-        const categoryFilter = document.getElementById('categoryFilter');
-        if (!categoryFilter) {
-            console.error('Элемент categoryFilter не найден');
-            return;
-        }
-
-        while (categoryFilter.children.length > 1) {
-            categoryFilter.removeChild(categoryFilter.lastChild);
-        }
-
-        this.categories.forEach(category => {
-            const option = document.createElement('option');
-            option.value = category;
-            option.textContent = category;
-            categoryFilter.appendChild(option);
-        });
-    }
-
     applyFilters() {
         let filtered = [...this.allArticles];
 
@@ -103,13 +69,6 @@ class ArticlesPage {
                 (article.title && article.title.toLowerCase().includes(searchTerm)) ||
                 (article.summary && article.summary.toLowerCase().includes(searchTerm)) ||
                 (article.author && article.author.toLowerCase().includes(searchTerm))
-            );
-        }
-
-        // Фильтрация по категории
-        if (this.filters.category) {
-            filtered = filtered.filter(article =>
-                article.category === this.filters.category
             );
         }
 
@@ -160,17 +119,14 @@ class ArticlesPage {
     updateFilterTags() {
         const filterTags = document.getElementById('filterTags');
         const searchTag = document.getElementById('searchTag');
-        const categoryTag = document.getElementById('categoryTag');
         const searchTerm = document.getElementById('searchTerm');
-        const categoryName = document.getElementById('categoryName');
 
-        if (!filterTags || !searchTag || !categoryTag || !searchTerm || !categoryName) {
+        if (!filterTags || !searchTag || !searchTerm) {
             console.error('Один из элементов фильтров не найден');
             return;
         }
 
         const hasSearch = this.filters.search !== '';
-        const hasCategory = this.filters.category !== '';
 
         if (hasSearch) {
             searchTerm.textContent = this.filters.search;
@@ -178,26 +134,12 @@ class ArticlesPage {
         } else {
             searchTag.style.display = 'none';
         }
-
-        if (hasCategory) {
-            categoryName.textContent = this.filters.category;
-            categoryTag.style.display = 'flex';
-        } else {
-            categoryTag.style.display = 'none';
-        }
-
-        if (hasSearch || hasCategory) {
-            filterTags.style.display = 'flex';
-        } else {
-            filterTags.style.display = 'none';
-        }
     }
 
     bindEvents() {
         // Поиск
         const searchBtn = document.getElementById('searchBtn');
         const searchInput = document.getElementById('searchInput');
-        const categoryFilter = document.getElementById('categoryFilter');
         const sortFilter = document.getElementById('sortFilter');
 
         if (searchBtn && searchInput) {
@@ -212,13 +154,6 @@ class ArticlesPage {
             });
         }
 
-        // Фильтр по категориям
-        if (categoryFilter) {
-            categoryFilter.addEventListener('change', (e) => {
-                this.setCategory(e.target.value);
-            });
-        }
-
         // Сортировка
         if (sortFilter) {
             sortFilter.addEventListener('change', (e) => {
@@ -228,17 +163,12 @@ class ArticlesPage {
 
         // Обработчики для тегов фильтров
         const clearSearchBtn = document.querySelector('#searchTag .tag-remove');
-        const clearCategoryBtn = document.querySelector('#categoryTag .tag-remove');
         const clearAllBtn = document.querySelector('.clear-all-filters');
 
         if (clearSearchBtn) {
             clearSearchBtn.addEventListener('click', () => this.clearSearch());
         }
-
-        if (clearCategoryBtn) {
-            clearCategoryBtn.addEventListener('click', () => this.clearCategory());
-        }
-
+        
         if (clearAllBtn) {
             clearAllBtn.addEventListener('click', () => this.clearAllFilters());
         }
@@ -253,11 +183,6 @@ class ArticlesPage {
 
     setSearch(searchTerm) {
         this.filters.search = searchTerm;
-        this.applyFilters();
-    }
-
-    setCategory(category) {
-        this.filters.category = category;
         this.applyFilters();
     }
 
@@ -356,16 +281,8 @@ class ArticlesPage {
         this.applyFilters();
     }
 
-    clearCategory() {
-        const categoryFilter = document.getElementById('categoryFilter');
-        if (categoryFilter) categoryFilter.value = '';
-        this.filters.category = '';
-        this.applyFilters();
-    }
-
     clearAllFilters() {
         this.clearSearch();
-        this.clearCategory();
 
         const sortFilter = document.getElementById('sortFilter');
         if (sortFilter) sortFilter.value = 'newest';
@@ -373,7 +290,7 @@ class ArticlesPage {
 
         this.applyFilters();
     }
-    
+
     showLikeError(likeBtn, originalLikes, wasLiked) {
         // Восстанавливаем предыдущее состояние при ошибке
         const icon = wasLiked ? '💖' : '❤️';

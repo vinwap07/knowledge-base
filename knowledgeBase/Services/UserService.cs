@@ -9,6 +9,8 @@ public class UserService
 {
     private UserRepository _userRepository;
     private SessionRepository _sessionRepository;
+    private UserRegisterValidator _userRegisterValidator = new UserRegisterValidator();
+    private UserLoginValidator _userLoginValidator = new UserLoginValidator();
 
     public UserService(UserRepository userRepository, SessionRepository sessionRepository)
     {
@@ -18,7 +20,14 @@ public class UserService
 
     public async Task<string> RegisterNewUser(User user)
     {
-        // TODO: валидация данных 
+
+        var validationResult = await _userRegisterValidator.ValidateAsync(user);
+
+        if (validationResult is { IsValid: false })
+        {
+            return validationResult.Errors.First().ToString();
+        }
+
         user.RoleId = 1;
         user.Password = PasswordHasher.Hash(user.Password);
         
@@ -51,22 +60,37 @@ public class UserService
         return await _sessionRepository.Delete(sessionId);
     }
 
-    public async Task<User> Authenticate(User incomingUser)
+    public async Task<(bool, string, User)> Authenticate(User incomingUser)
     {
-        // TODO: добавить валидацию email
+        var validationResult = await _userRegisterValidator.ValidateAsync(incomingUser);
+        var result = string.Empty;
+        
+        if (validationResult is { IsValid: false })
+        {
+            result = validationResult.Errors.First().ToString();
+        }
+        
+        var isAuth = false;
         var user = await _userRepository.GetById(incomingUser.Email);
-        var role = await _userRepository.GetRoleByRoleId(user.RoleId);
         if (user.Email != null && user.Email != string.Empty)
         {
             if (PasswordHasher.Validate(user.Password, incomingUser.Password))
             {
-                return user;
+                isAuth = true;
             }
-            
-            return new User();
+            else
+            {
+                result = "Неправильный пароль или почтовый адрес";
+            }
         }
         
-        return new User();
+        return (isAuth, result, user);
+    }
+
+    public async Task<User> GetUserById(string email)
+    {
+        var user = await _userRepository.GetById(email);
+        return user;
     }
 
     public async Task<string> GetUserRole(User user)
@@ -100,5 +124,17 @@ public class UserService
         
         _sessionRepository.Create(new Session() {SesisonId = sessionId, UserEmail = user.Email, EndTime = endTime});
         return sessionId;
+    }
+
+    public async Task<bool> AddModerator(string email, string role)
+    {
+        if (role != "Admin")
+        {
+            return false;
+        }
+        var user = await GetUserById(email);
+        user.RoleId = 3;
+        var isChanged = await UpdateUser(user);
+        return isChanged;
     }
 }

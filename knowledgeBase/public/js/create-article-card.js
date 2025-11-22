@@ -14,9 +14,10 @@ function createArticleCard(article) {
         <div class="article-card" data-article-id="${article.id}"">
             <div class="article-image">${article.icon}</div>
             <div class="article-content">
+                
                 <div class="article-category">${category}</div>
                 <h3 class="article-title">${article.title || 'Без названия'}</h3>
-                <p class="article-summary">${article.description || 'Описание отсутствует'}</p>
+                <p class="article-summary" style="height: 3rem">${article.description || 'Описание отсутствует'}</p>
                 
                 <div class="article-meta">
                     <div class="article-author">${article.author || 'Неизвестный автор'}</div>

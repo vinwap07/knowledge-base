@@ -15,9 +15,9 @@ document.getElementById('registration-form').addEventListener('submit', async fu
         isValid = false;
     }
 
-    const nameRegex = /^[a-zA-Zа-яА-ЯёЁ\s\-]+$/;
+    const nameRegex = /^[a-zA-Z\s\-]+$/;
     if (name.length < 2 || name.length > 15 || !nameRegex.test(name)) {
-        showError('nameError', 'Имя должно иметь длину от 2 до 15 символов и содержать только буквы');
+        showError('nameError', 'Имя должно иметь длину от 2 до 15 символов и содержать только латинские буквы');
         isValid = false;
     }
 

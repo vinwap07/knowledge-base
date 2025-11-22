@@ -10,11 +10,13 @@ public class ArticleController : BaseController
 {
     private ArticleService _articleService;
     private UserService _userService;
+    private CategoryService _categoryService;
 
-    public ArticleController(ArticleService articleService, UserService userService)
+    public ArticleController(ArticleService articleService, UserService userService, CategoryService categoryService)
     {
         _articleService = articleService;
         _userService = userService;
+        _categoryService = categoryService;
     }
 
     public async Task CheckLike(HttpContext context, Dictionary<string, string> parameters)
@@ -43,7 +45,7 @@ public class ArticleController : BaseController
         }
         
         var article = await _articleService.GetArticleById(num, sessionId);
-        var html = PageCreator.GetArticlePage(article);
+        var html = PageCreator.CreateArticlePage(article);
         context.Response.ContentType = "text/html; charset=utf-8";
         await WriteResponseAsync(context.Response, html);
     }
@@ -105,6 +107,24 @@ public class ArticleController : BaseController
         var articles = await _articleService.GetAllArticles(sessionId);
         var articleDTOs = DTOMaker.MapArticles(articles);
         await SendJsonAsync(context.Response, articleDTOs);
+    }
+
+    public async Task GeyArticlesByCategory(HttpContext context, Dictionary<string, string> parameters)
+    {
+        var category = parameters["category"];
+        var sessionId = CookieHelper.GetCookieValue(context.Request, "SessionID");
+        var articles = await _articleService.SearchArticlesByCategory(category, sessionId);
+        var articleDTOs = DTOMaker.MapArticles(articles);
+        await SendJsonAsync(context.Response, articleDTOs);
+    }
+    
+    public async Task GeyArticlesByCategoryPage(HttpContext context, Dictionary<string, string> parameters)
+    {
+        var slug = parameters["category"];
+        var category = await _categoryService.GetById(slug);
+        var html = PageCreator.CreateArticlesByCategoryPage(category);
+        context.Response.ContentType = "text/html; charset=utf-8";
+        await WriteResponseAsync(context.Response, html);
     }
     
     // TODO: SearchArticlesByCategory

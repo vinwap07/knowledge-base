@@ -2,7 +2,7 @@ namespace knowledgeBase;
 
 using System.Text.Json.Serialization;
 
-public class OllamaResponse 
+public class OllamaResponse : IAiResponse
 {
     [JsonPropertyName("model")]
     public string Model { get; set; }

@@ -13,12 +13,9 @@ public static class CookieHelper
 
     public static void DeleteCookie(HttpListenerResponse response, string cookieName)
     {
-        var cookie = new Cookie(cookieName, "")
-        {
-            Expires = DateTime.Now.AddDays(-1),
-            Path = "/"
-        };
-        response.Cookies.Add(cookie);
+        var expires = DateTime.Now.AddDays(-1).ToString("R");
+        var cookieValue = $"{cookieName}=; Expires={expires}; Path=/; SameSite=Strict";
+        response.Headers.Add("Set-Cookie", cookieValue);
     }
 
     public static string GetCookieValue(HttpListenerRequest request, string cookieName)

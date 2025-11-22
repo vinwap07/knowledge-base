@@ -13,12 +13,12 @@ public class CategoryRepository : BaseRepository<Category, string>
         _databaseConnection = databaseConnection;
     }
     
-    public async override Task<Category> GetById(string name)
+    public async override Task<Category> GetById(string slug)
     {
-        var sql = @"select * from Category where Name = @Name";
+        var sql = @"select * from Category where slug = @slug";
         var parameters = new Dictionary<string, object>
         {
-            ["@Name"] = name
+            ["@slug"] = slug
         };
         
         using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
@@ -62,8 +62,8 @@ public class CategoryRepository : BaseRepository<Category, string>
     {
         // TODO: переделать с новыми полями
         var sql = @"update Category
-                set Slug = @Slug
-                where Name = @Name";
+                set Name = @Name
+                where Slug = @Slug";
         var parameters = new Dictionary<string, object>
         {
             ["@Name"] = category.Name,

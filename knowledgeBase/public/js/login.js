@@ -10,12 +10,12 @@ document.getElementById('login-form').addEventListener('submit', async function(
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-        showError('emailError', 'Введите корректный email');
+        document.getElementById('emailError').textContent = 'Введите корректный email';
         isValid = false;
     }
 
     if (password.length < 2 || password.length > 15) {
-        showError('passwordError', 'Пароль должен содержать от 2 до 15 символов');
+        document.getElementById('passwordError').textContent = 'Пароль должен содержать от 2 до 15 символов';
         isValid = false;
     }
 
@@ -43,14 +43,15 @@ document.getElementById('login-form').addEventListener('submit', async function(
                     document.close();
                 });
             }
+            
+            let contentType = response.headers.get('content-type');
 
             let responseText = await response.text();
-
-            const isFailed = responseText === "Wrong email or password";
-            if (isFailed) {
-                showError('wrong-data-text', responseText)
+            
+            if (contentType === 'text/plain; charset=utf-8') {
+                document.getElementById('wrong-data-text').textContent = responseText;
             } else {
-                showError('wrong-data-text','Вход выполнен успешно!');
+                showNotification('wrong-data-text','Вход выполнен успешно!');
                 window.location.href = 'http://localhost:5000/profile.html';
             }
 

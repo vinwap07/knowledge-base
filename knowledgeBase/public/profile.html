@@ -19,17 +19,6 @@
 
 <main class="profile-container">
     <div class="profile-inner">
-        <div class="container">
-            <!-- Переключатель ролей (только для разработки) -->
-            <div class="role-switcher" id="roleSwitcher">
-                <h3>Переключить роль (для тестирования):</h3>
-                <div class="role-buttons">
-                    <button class="btn btn-outline btn-sm" onclick="profileManager.switchRole('user')">👤 Пользователь</button>
-                    <button class="btn btn-outline btn-sm" onclick="profileManager.switchRole('moderator')">🛡️ Модератор</button>
-                    <button class="btn btn-outline btn-sm" onclick="profileManager.switchRole('admin')">👑 Администратор</button>
-                </div>
-            </div>
-        </div>
     
             <!-- Основная информация профиля -->
             <section class="profile-header">
@@ -42,11 +31,6 @@
                     <div class="profile-role" id="profileRole">
                         <span class="role-badge">Загрузка...</span>
                     </div>
-                </div>
-                <div class="profile-actions" id="profileActions">
-                    <button class="btn btn-outline" onclick="profileManager.editProfile()">
-                        Редактировать профиль
-                    </button>
                 </div>
                 <button class="btn btn-outline" id="createModeratorBtn" onclick="profileManager.showCreateModeratorModal()">
                     Назначить модератора
@@ -83,7 +67,7 @@
     
             <!-- Модальное окно назначения модератора -->
             <div class="modal" id="createModeratorModal">
-                <div class="modal-content">
+                <div class="modal-content" style="width: 26rem">
                     <div class="modal-header">
                         <h3>🛡️ Назначить модератора</h3>
                         <button class="modal-close" onclick="profileManager.hideCreateModeratorModal()">&times;</button>
@@ -91,7 +75,7 @@
                     <form id="createModeratorForm" onsubmit="profileManager.createModerator(event)">
                         <div class="form-group">
                             <label for="userEmail">Email пользователя</label>
-                            <input type="email" id="userEmail" name="email" placeholder="user@example.com" required>
+                            <input type="email" id="userEmail" name="email" placeholder="user@example.com" required style="width: 20rem">
                             <div class="form-hint">Пользователь должен быть зарегистрирован в системе</div>
                         </div>
                         <button type="submit" class="btn btn-danger">Назначить модератором</button>
