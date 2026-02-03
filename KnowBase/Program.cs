@@ -16,6 +16,7 @@ DatabaseInitializer dbInitializer = new DatabaseInitializer(dbConnection);
 
 string sqlCreateFilePath = config.StaticFilesPath + "createDataBase.sql";
 string sqlInsertFilePath = config.StaticFilesPath + "insertDataBase.sql";
+string uriPrefix = $"http://localhost:{config.Port}/"; 
 
 await dbInitializer.InitializeAsync(sqlCreateFilePath, sqlInsertFilePath);
 
@@ -83,7 +84,7 @@ middlewarePipeline.Use(new RoutingMiddleware(routeTable));
 middlewarePipeline.Use(new StaticFilesMiddleware(config.StaticFilesPath));
 
 var listener = new HttpListener();
-listener.Prefixes.Add("http://localhost:5000/");
+listener.Prefixes.Add(uriPrefix);
 listener.Start();
 
 while (listener.IsListening)

@@ -1,0 +1,6 @@
+{
+  "DatabaseConnectionString": "Server=localhost;Database=KnowledgeBase;Trusted_Connection=true;",
+  "ApiKey": "Ключ от Ollama API",
+  "StaticFilesPath": "Директория статических файлов, в проекте - public/", 
+  "Port": "Порт для хостинга сайта"
+} 
