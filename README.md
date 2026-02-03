@@ -1,30 +1,31 @@
-# Система управления базой знаний (Knowledge Base)
+# Knowledge Base Management System
 
-Веб-приложение для централизованного хранения, структурирования и интеллектуального поиска информации. Построено на современном стеке .NET 8 с использованием чистой архитектуры и AI-интеграции для умной обработки контента.
+A web application for centralized storage, structuring, and intelligent search of information. Built on the modern .NET 8 stack using clean architecture and AI integration for smart content processing.
 
 
-## Архитектура и стек технологий
-|Категория|Технологии|
+## Architecture and Tech Stack
+
+|Category|Technologies|
 |---|---|
-|Бэкенд|`C#`, `.NET 8` |
-|Архитектура|`Repository`,`DTO`,`MVC`, `Middleware Pipeline`|
-|База данных|`PostgreSQL`|
-|Фронтенд|`JavaScript`, `HTML5`, `CSS3`|
+|Backend|`C#`, `.NET 8` |
+|Architecture|`Repository`,`DTO`,`MVC`, `Middleware Pipeline`|
+|Database|`PostgreSQL`|
+|Frontend|`JavaScript`, `HTML5`, `CSS3`|
 |AI|`Ollama API`|
 
-## 🚀 Запуск приложения
+## 🚀 Running the Application 
 
-**Предварительные требования**
+**Prerequisites**
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [PostgreSQL](https://www.postgresql.org/download/) 
 ---
 
-1. Склонируйте репозиторий: 
+1. Clone the repository: 
 ```
 git clone https://github.com/vinwap07/knowledge-base
 ``` 
-2. Настройте конфигурацию проекта. Для этого внесите данные в существующий файл config.json
+2. Configure the project. Enter the data into the existing config.json file.
 
 ``` json
 {
@@ -34,13 +35,13 @@ git clone https://github.com/vinwap07/knowledge-base
   "Port": "Порт для хостинга сайта"
 } 
 ```
-2. Выполните команду из корневой директории проекта
+2. Execute the command from the project's root directory.
 ```
 dotnet run
 ```
-3. После успешного запуска веб-приложение будет доступно по адресу http://localhost:{номер указанного вами порта}
+3. After successful launch, the web application will be available at: http://localhost:`your port number`
 
-## 📞 Контакты
+## 📞 Contacts
 * **Email:** adelinazakirova24@gmail.com
 * **GitHub:** [vinwap07](https://github.com/vinwap07)
 * **Telegram:** [@vinwap](https://t.me/vinwap)
