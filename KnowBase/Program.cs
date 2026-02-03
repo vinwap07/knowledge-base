@@ -77,7 +77,6 @@ routeTable.Get("/category/articles/{category}",
     async (context, parameters) => await articleController.GeyArticlesByCategory(context, parameters));
 
 var middlewarePipeline = new MiddlewarePipeline();
-//middlewarePipeline.Use(new LoggingMiddleware());
 middlewarePipeline.Use(new ErrorHandlingMiddleware());
 middlewarePipeline.Use(new AuthenticationMiddleware(userService, sessionRepository));
 middlewarePipeline.Use(new RoutingMiddleware(routeTable));

@@ -367,3 +367,57 @@ main {
     animation: fadeIn 0.5s ease-out;
 }
 
+
+.search-box {
+    position: relative;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 25px;
+    margin-bottom: 1rem;
+    padding: 5px;
+    border: 1px solid rgba(163, 163, 163, 0.3);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.search-box:focus-within {
+    transform: translateY(-2px);
+    box-shadow:
+            0 15px 40px rgba(0, 0, 0, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.search-box input {
+    width: 100%;
+    padding: 15px 60px 15px 25px;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    color: #333;
+    outline: none;
+    border-radius: 20px;
+}
+
+.search-box input::placeholder {
+    color: #999;
+    font-weight: 300;
+}
+
+.search-box button {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 45px;
+    height: 45px;
+    border: none;
+    background: #c1c2ca;
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}

@@ -39,7 +39,7 @@ public class ArticleRepository : BaseRepository<Article, int>
         var articles = new List<Article>();
         
         using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
-        if (reader.Read())
+        while (reader.Read())
         {
             articles.Add(Mapper.MapToArticle(reader));
         }

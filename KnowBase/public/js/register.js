@@ -15,14 +15,14 @@ document.getElementById('registration-form').addEventListener('submit', async fu
         isValid = false;
     }
 
-    const nameRegex = /^[a-zA-Z\s\-]+$/;
+    const nameRegex =/^[a-zA-Z0-9\s\-]+$/;
     if (name.length < 2 || name.length > 15 || !nameRegex.test(name)) {
         showError('nameError', 'Имя должно иметь длину от 2 до 15 символов и содержать только латинские буквы');
         isValid = false;
     }
 
-    if (password.length < 2 || password.length > 15) {
-        showError('passwordError', 'Пароль должен содержать от 2 до 15 символов');
+    if (password.length < 8 || password.length > 15) {
+        showError('passwordError', 'Пароль должен содержать от 8 до 15 символов');
         isValid = false;
     }
 
@@ -49,15 +49,16 @@ document.getElementById('registration-form').addEventListener('submit', async fu
                     document.close();
                 });
             }
-    
+
+            let contentType = response.headers.get('content-type');
+
             let responseText = await response.text();
-            console.log(responseText);
-            
-            if (responseText === '""') {
-                alert('Регистрация прошла успешно!');
-                window.location.href = 'http://localhost:5000/profile.html';
+
+            if (contentType === 'text/plain; charset=utf-8') {
+                document.getElementById('wrong-data-text').textContent = responseText;
             } else {
-                showError('wrong-data-text', responseText);
+                showNotification('wrong-data-text','Вход выполнен успешно!');
+                window.location.href = 'http://localhost:5000/profile.html';
             }
         } catch (error) {
             console.error("Ошибка:", error)

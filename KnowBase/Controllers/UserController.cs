@@ -126,7 +126,7 @@ public class UserController : BaseController
         
         try
 	    {
-		    // TODO: убрать switch и всю логику в сервис 
+		    
 		    var result = await _userService.RegisterNewUser(user);
 		    switch (result)
 		    {

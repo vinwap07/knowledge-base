@@ -60,19 +60,10 @@ public static class PageCreator
             <button id=""searchBtn"">🔍</button>
         </div>
 
-        <div class=""articles-filters"">
-            <select id=""sortFilter"" class=""filter-select"">
-                <option value=""newest"">Сначала новые</option>
-                <option value=""oldest"">Сначала старые</option>
-                <option value=""popular"">По популярности</option>
-            </select>
-        </div>
-
         <!-- Теги активных фильтров -->
         <div class=""filter-tags"" id=""filterTags"" style=""display: none;"">
             <div class=""filter-tag"" id=""searchTag"" style=""display: none;"">
                 <span>Поиск: ""<span id=""searchTerm""></span>""</span>
-                <button class=""tag-remove"">×</button>
             </div>
             <button class=""clear-all-filters"">Очистить все</button>
         </div>

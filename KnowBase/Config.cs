@@ -6,19 +6,13 @@ public class Config
 {
     public string DatabaseConnectionString { get; set; }
     public string ApiKey { get; set; }
-    public string LogFilePath { get; set; }
-    public string LogErrorFilePath { get; set; }
     public string StaticFilesPath { get; set; }
-    public string TemplatesPath { get; set; }
 
-    public Config(string databaseConnectionString, string logFilePath, string logErrorFilePath, string staticFilesPath,
-        string templatesPath)
+    public Config(string databaseConnectionString, string apiKey, string staticFilesPath)
     {
         DatabaseConnectionString = databaseConnectionString;
-        LogFilePath = logFilePath;
-        LogErrorFilePath = logErrorFilePath;
+        ApiKey = apiKey;
         StaticFilesPath = staticFilesPath;
-        TemplatesPath = templatesPath;
     }
     
     public static Config FromFile(string configPath)

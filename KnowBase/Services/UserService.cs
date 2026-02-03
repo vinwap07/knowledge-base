@@ -20,7 +20,6 @@ public class UserService
 
     public async Task<string> RegisterNewUser(User user)
     {
-
         var validationResult = await _userRegisterValidator.ValidateAsync(user);
 
         if (validationResult is { IsValid: false })
