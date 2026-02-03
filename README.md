@@ -30,9 +30,9 @@ git clone https://github.com/vinwap07/knowledge-base
 ``` json
 {
   "DatabaseConnectionString": "Server=localhost;Database=KnowledgeBase;Trusted_Connection=true;",
-  "ApiKey": "Ключ от Ollama API",
-  "StaticFilesPath": "Директория статических файлов, в проекте - public/", 
-  "Port": "Порт для хостинга сайта"
+  "ApiKey": "Ollama API Key",
+  "StaticFilesPath": "Static files directory, in the project - public/", 
+  "Port": "Port for hosting the site"
 } 
 ```
 2. Execute the command from the project's root directory.
