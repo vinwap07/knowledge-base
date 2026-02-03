@@ -39,7 +39,7 @@ git clone https://github.com/vinwap07/knowledge-base
 ```
 dotnet run
 ```
-3. After successful launch, the web application will be available at: http://localhost:`your port number`
+3. After successful launch, the web application will be available at: http://localhost: `your port number`
 
 ## 📞 Contacts
 * **Email:** adelinazakirova24@gmail.com
